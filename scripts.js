@@ -129,7 +129,7 @@ function showGoBackButton() {
 
     if (chatHistory.length > 1) {
         let backButton = document.createElement("button");
-        backButton.textContent = "← Go Back";
+        backButton.textContent = "â† Go Back";
         backButton.id = "go-back-button";
         backButton.classList.add("chat-button");
 
@@ -216,7 +216,7 @@ function addFileUploadOption() {
     chatBox.appendChild(uploadContainer);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // 🔥 Hide input field & send button during file upload
+    // ðŸ”¥ Hide input field & send button during file upload
     document.getElementById("user-input").style.display = "none";
     document.getElementById("send-button").style.display = "none";
 
@@ -241,7 +241,7 @@ function finalThankYou(email) {
     // Add a button to trigger the spinner
     let chatBox = document.getElementById("chat-box");
     let spinButton = document.createElement("button");
-    spinButton.textContent = "🎰 Spin the Wheel!";
+    spinButton.textContent = "ðŸŽ° Spin the Wheel!";
     spinButton.classList.add("chat-button");
     spinButton.onclick = function () {
         spinButton.remove(); // Remove the button after clicking
@@ -260,7 +260,7 @@ function showSpinningAnimation() {
     // Create a spinning message
     let spinner = document.createElement("div");
     spinner.classList.add("spinner");
-    spinner.textContent = "🎰 Spinning...";
+    spinner.textContent = "ðŸŽ° Spinning...";
 
     chatBox.appendChild(spinner);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -274,7 +274,7 @@ function showSpinningAnimation() {
 
 // Function to randomly select a reward
 function giveReward() {
-    let rewards = ["Chips 🍟", "Naan Bread", "Onion Bhaji", "Chicken Pakora"];
+    let rewards = ["Chips ðŸŸ", "Naan Bread", "Onion Bhaji", "Chicken Pakora"];
     let chosenReward = rewards[Math.floor(Math.random() * rewards.length)];
     reward = chosenReward;
 
@@ -291,14 +291,14 @@ function giveReward() {
         formData.append("image", base64String);
         formData.append("filename", file.name);
         formData.append("mimeType", file.type);
-        const response = await fetch("https://script.google.com/macros/s/AKfycby63y4lf41k03zov3XAHad79dhKTzHe0M0FVyFe6aIMqrcsvFV_usGHitmu0zbJ_4Ki/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbxU98PMpE95LtUOwqj3ifLZUfeYQhtT4NCCWWb0ycT4dPYFKlifZpwzN_VtzGslErHC/exec", {
             method: "POST",
             body: formData
         });
 
         const result = await response.json();
         if (result.success) {
-            addMessage(`🎉 You have won **${chosenReward}**!`, "bot");
+            addMessage(`ðŸŽ‰ You have won **${chosenReward}**!`, "bot");
             addMessage("Your review will be validated, and your voucher will be emailed to you within 12 hours.", "bot");
             addMessage("We appreciate your support and hope to serve you again soon!", "bot");
             // document.getElementById("status").innerHTML = `Image uploaded: <a href="${result.fileUrl}" target="_blank">View Image</a>`;
