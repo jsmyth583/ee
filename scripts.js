@@ -291,7 +291,7 @@ function giveReward() {
         formData.append("image", base64String);
         formData.append("filename", file.name);
         formData.append("mimeType", file.type);
-        const response = await fetch("https://script.google.com/macros/s/AKfycbxU98PMpE95LtUOwqj3ifLZUfeYQhtT4NCCWWb0ycT4dPYFKlifZpwzN_VtzGslErHC/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbw7fidI3Tk5wsMtLsA78o9bw0RY8m8a4Jvuk9EN6gZPE8PtpqsVsm3XFBHhuwUkNMMO/exec", {
             method: "POST",
             body: formData
         });
