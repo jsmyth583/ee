@@ -238,14 +238,13 @@ function finalThankYou(email) {
     sessionStorage.setItem("userEmail", email);
     addMessage("Thank you for submitting your details!", "bot");
 
-    // Add a button to trigger the spinner
     let chatBox = document.getElementById("chat-box");
     let spinButton = document.createElement("button");
-    spinButton.textContent = "ðŸŽ° Spin the Wheel!";
+    spinButton.textContent = "🎰 Spin the Wheel!";
     spinButton.classList.add("chat-button");
     spinButton.onclick = function () {
-        spinButton.remove(); // Remove the button after clicking
-        showSpinningAnimation();
+        spinButton.remove();
+        showSpinningWheel(); // Call the new spinning wheel function
     };
 
     chatBox.appendChild(spinButton);
@@ -253,63 +252,99 @@ function finalThankYou(email) {
     saveChatState();
 }
 
+
 // Function to create spinning animation
-function showSpinningAnimation() {
+function showSpinningWheel() {
     let chatBox = document.getElementById("chat-box");
 
-    // Create a spinning message
-    let spinner = document.createElement("div");
-    spinner.classList.add("spinner");
-    spinner.textContent = "ðŸŽ° Spinning...";
+    // Hide other elements and show wheel
+    document.getElementById("wheel-container").style.display = "block";
 
-    chatBox.appendChild(spinner);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    let canvas = document.getElementById("wheelCanvas");
+    let ctx = canvas.getContext("2d");
 
-    // Simulate spinning delay before displaying reward
-    setTimeout(() => {
-        spinner.remove(); // Remove the spinning animation
-        giveReward(); // Display the reward
-    }, 3000);
-}
+    let rewards = ["Chips 🍟", "Naan Bread 🍞", "Onion Bhaji 🧅", "Chicken Pakora 🍗"];
+    let numSlices = rewards.length;
+    let spinAngle = 0;
+    let isSpinning = false;
+    let spinSpeed = Math.random() * 10 + 20; // Random speed between 20-30
+    let spinTime = 3000; // 3 seconds spin duration
+    let finalReward = "";
 
-// Function to randomly select a reward
-function giveReward() {
-    let rewards = ["Chips ðŸŸ", "Naan Bread", "Onion Bhaji", "Chicken Pakora"];
-    let chosenReward = rewards[Math.floor(Math.random() * rewards.length)];
-    reward = chosenReward;
+    // Draw Wheel Function
+    function drawWheel() {
+        let colors = ["#FF5733", "#33FF57", "#3357FF", "#F5A623"];
+        let startAngle = 0;
+        let sliceAngle = (2 * Math.PI) / numSlices;
 
-    const file = screenshot;
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async function () {
-        const base64String = reader.result.split(',')[1];  // Remove "data:image/png;base64,"
+        for (let i = 0; i < numSlices; i++) {
+            ctx.beginPath();
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.moveTo(150, 150);
+            ctx.arc(150, 150, 150, startAngle, startAngle + sliceAngle);
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
 
-        const formData = new URLSearchParams();
-        formData.append("name", name);
-        formData.append("email", email);
-        formData.append("reward", reward);
-        formData.append("image", base64String);
-        formData.append("filename", file.name);
-        formData.append("mimeType", file.type);
-        const response = await fetch("https://script.google.com/macros/s/AKfycbw7fidI3Tk5wsMtLsA78o9bw0RY8m8a4Jvuk9EN6gZPE8PtpqsVsm3XFBHhuwUkNMMO/exec", {
-            method: "POST",
-            body: formData
-        });
+            ctx.save();
+            ctx.translate(150, 150);
+            ctx.rotate(startAngle + sliceAngle / 2);
+            ctx.fillStyle = "#fff";
+            ctx.font = "16px Arial";
+            ctx.fillText(rewards[i], 50, 10);
+            ctx.restore();
 
-        const result = await response.json();
-        if (result.success) {
-            addMessage(`ðŸŽ‰ You have won **${chosenReward}**!`, "bot");
-            addMessage("Your review will be validated, and your voucher will be emailed to you within 12 hours.", "bot");
-            addMessage("We appreciate your support and hope to serve you again soon!", "bot");
-            // document.getElementById("status").innerHTML = `Image uploaded: <a href="${result.fileUrl}" target="_blank">View Image</a>`;
-
-        } else {
-            console.error(result.error);
-            addMessage(`${result.error}`, "bot");
-            // alert(result.error);
+            startAngle += sliceAngle;
         }
+
+        // Draw Arrow Indicator
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(150, 0);
+        ctx.lineTo(140, 30);
+        ctx.lineTo(160, 30);
+        ctx.fill();
     }
-    // Display the reward to the user
-    
+
+    // Spin Animation Function
+    function spinWheel() {
+        if (isSpinning) return;
+        isSpinning = true;
+
+        let start = Date.now();
+        function rotate() {
+            let elapsed = Date.now() - start;
+            let progress = elapsed / spinTime;
+            spinAngle += spinSpeed * (1 - progress);
+            spinSpeed *= 0.98; // Gradually slow down
+
+            if (spinSpeed < 0.5) {
+                isSpinning = false;
+                finalReward = rewards[Math.floor(numSlices - (spinAngle / (2 * Math.PI) * numSlices) % numSlices)];
+                document.getElementById("reward-text").innerHTML = `🎉 You won <b>${finalReward}</b>!`;
+                saveChatState();
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(150, 150);
+            ctx.rotate(spinAngle);
+            ctx.translate(-150, -150);
+            drawWheel();
+            ctx.restore();
+            requestAnimationFrame(rotate);
+        }
+        rotate();
+    }
+
+    drawWheel();
+
+    // Start spinning when clicked
+    canvas.onclick = function () {
+        spinWheel();
+    };
+
+    chatBox.scrollTop = chatBox.scrollHeight;
     saveChatState();
 }
