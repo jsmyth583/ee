@@ -252,8 +252,6 @@ function finalThankYou(email) {
     saveChatState();
 }
 
-
-
 function showSpinningWheel() {
     let chatBox = document.getElementById("chat-box");
 
@@ -264,20 +262,21 @@ function showSpinningWheel() {
 
     let canvas = document.getElementById("wheelCanvas");
     let ctx = canvas.getContext("2d");
-
     let spinButton = document.getElementById("spin-btn");
     let rewardText = document.getElementById("reward-text");
+
     let spinAngle = 0;
     let isSpinning = false;
-    let spinSpeed = Math.random() * 15 + 25; // Random spin speed
+    let spinSpeed = 20; // Initial spin speed
     let spinTime = 4000; // 4 seconds duration
-    let finalReward = "";
-    
+
     let rewards = ["Chips 🍟", "Naan Bread 🍞", "Onion Bhaji 🧅", "Chicken Pakora 🍗"];
-    
+    let finalReward = "";
+
     function drawWheel() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
+        // Draw wheel border
         ctx.fillStyle = "#FFF";
         ctx.beginPath();
         ctx.arc(150, 150, 140, 0, 2 * Math.PI);
@@ -287,7 +286,21 @@ function showSpinningWheel() {
         ctx.stroke();
         ctx.closePath();
 
-        // Draw the center "SPIN" circle
+        // Draw sections
+        let numSections = rewards.length;
+        let angleStep = (2 * Math.PI) / numSections;
+
+        for (let i = 0; i < numSections; i++) {
+            ctx.fillStyle = i % 2 === 0 ? "#F4F4F4" : "#EAEAEA";
+            ctx.beginPath();
+            ctx.moveTo(150, 150);
+            ctx.arc(150, 150, 140, i * angleStep, (i + 1) * angleStep);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // Draw center "SPIN" button
         ctx.fillStyle = "#28A745";
         ctx.beginPath();
         ctx.arc(150, 150, 50, 0, 2 * Math.PI);
@@ -331,7 +344,6 @@ function showSpinningWheel() {
                     rewardText.style.display = "block";
                     saveChatState();
                 }, 1000);
-
                 return;
             }
 
@@ -351,4 +363,59 @@ function showSpinningWheel() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
     saveChatState();
+}
+
+
+   function spinWheel() {
+    if (isSpinning) return;
+    isSpinning = true;
+
+    spinButton.style.display = "none"; // Hide button while spinning
+    let start = Date.now();
+
+    function rotate() {
+        let elapsed = Date.now() - start;
+        let progress = elapsed / spinTime;
+        spinAngle += spinSpeed * (1 - progress);
+        spinSpeed *= 0.98; // Gradually slow down
+
+        if (spinSpeed < 0.5) {
+            isSpinning = false;
+            let index = Math.floor(Math.random() * rewards.length);
+            finalReward = rewards[index];
+
+            setTimeout(() => {
+                rewardText.innerHTML = `🎉 You won <b>${finalReward}</b>!`;
+                rewardText.style.display = "block";
+
+                // Save reward
+                sessionStorage.setItem("userReward", finalReward);
+
+                // ⏳ Return to chatbot after 2 seconds
+                setTimeout(() => {
+                    document.getElementById("wheel-container").style.display = "none"; // Hide wheel
+                    document.getElementById("user-input").style.display = "none";
+                    document.getElementById("send-button").style.display = "none";
+
+                    // Show final chatbot messages
+                    addMessage(`🎉 You won **${finalReward}**!`, "bot");
+                    addMessage("✅ Your review will be validated, and your voucher will be emailed within 12 hours.", "bot");
+                    addMessage("💚 We appreciate your support and hope to serve you again soon!", "bot");
+
+                    saveChatState();
+                }, 2000);
+            }, 1000);
+            return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(150, 150);
+        ctx.rotate(spinAngle);
+        ctx.translate(-150, -150);
+        drawWheel();
+        ctx.restore();
+        requestAnimationFrame(rotate);
+    }
+    rotate();
 }
