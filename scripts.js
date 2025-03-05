@@ -129,7 +129,7 @@ function showGoBackButton() {
 
     if (chatHistory.length > 1) {
         let backButton = document.createElement("button");
-        backButton.textContent = "â† Go Back";
+        backButton.textContent = "Go Back";
         backButton.id = "go-back-button";
         backButton.classList.add("chat-button");
 
@@ -216,7 +216,7 @@ function addFileUploadOption() {
     chatBox.appendChild(uploadContainer);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // ðŸ”¥ Hide input field & send button during file upload
+    // Hide input field & send button during file upload
     document.getElementById("user-input").style.display = "none";
     document.getElementById("send-button").style.display = "none";
 
@@ -244,7 +244,7 @@ function finalThankYou(email) {
     spinButton.classList.add("chat-button");
     spinButton.onclick = function () {
         spinButton.remove();
-        showSpinningWheel(); // Call the new spinning wheel function
+        showSpinningWheel(); // Call the improved spinning wheel
     };
 
     chatBox.appendChild(spinButton);
@@ -253,65 +253,68 @@ function finalThankYou(email) {
 }
 
 
-// Function to create spinning animation
+
 function showSpinningWheel() {
     let chatBox = document.getElementById("chat-box");
 
-    // Hide other elements and show wheel
+    // Hide chat input and show the wheel
+    document.getElementById("user-input").style.display = "none";
+    document.getElementById("send-button").style.display = "none";
     document.getElementById("wheel-container").style.display = "block";
 
     let canvas = document.getElementById("wheelCanvas");
     let ctx = canvas.getContext("2d");
 
-    let rewards = ["Chips 🍟", "Naan Bread 🍞", "Onion Bhaji 🧅", "Chicken Pakora 🍗"];
-    let numSlices = rewards.length;
+    let spinButton = document.getElementById("spin-btn");
+    let rewardText = document.getElementById("reward-text");
     let spinAngle = 0;
     let isSpinning = false;
-    let spinSpeed = Math.random() * 10 + 20; // Random speed between 20-30
-    let spinTime = 3000; // 3 seconds spin duration
+    let spinSpeed = Math.random() * 15 + 25; // Random spin speed
+    let spinTime = 4000; // 4 seconds duration
     let finalReward = "";
-
-    // Draw Wheel Function
+    
+    let rewards = ["Chips 🍟", "Naan Bread 🍞", "Onion Bhaji 🧅", "Chicken Pakora 🍗"];
+    
     function drawWheel() {
-        let colors = ["#FF5733", "#33FF57", "#3357FF", "#F5A623"];
-        let startAngle = 0;
-        let sliceAngle = (2 * Math.PI) / numSlices;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#FFF";
+        ctx.beginPath();
+        ctx.arc(150, 150, 140, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = "#28A745";
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        ctx.closePath();
 
-        for (let i = 0; i < numSlices; i++) {
-            ctx.beginPath();
-            ctx.fillStyle = colors[i % colors.length];
-            ctx.moveTo(150, 150);
-            ctx.arc(150, 150, 150, startAngle, startAngle + sliceAngle);
-            ctx.fill();
-            ctx.stroke();
-            ctx.closePath();
+        // Draw the center "SPIN" circle
+        ctx.fillStyle = "#28A745";
+        ctx.beginPath();
+        ctx.arc(150, 150, 50, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
 
-            ctx.save();
-            ctx.translate(150, 150);
-            ctx.rotate(startAngle + sliceAngle / 2);
-            ctx.fillStyle = "#fff";
-            ctx.font = "16px Arial";
-            ctx.fillText(rewards[i], 50, 10);
-            ctx.restore();
+        ctx.fillStyle = "#FFF";
+        ctx.font = "18px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("SPIN", 150, 158);
 
-            startAngle += sliceAngle;
-        }
-
-        // Draw Arrow Indicator
+        // Draw arrow indicator
         ctx.fillStyle = "black";
         ctx.beginPath();
-        ctx.moveTo(150, 0);
-        ctx.lineTo(140, 30);
-        ctx.lineTo(160, 30);
+        ctx.moveTo(150, 10);
+        ctx.lineTo(140, 40);
+        ctx.lineTo(160, 40);
         ctx.fill();
     }
 
-    // Spin Animation Function
     function spinWheel() {
         if (isSpinning) return;
         isSpinning = true;
 
+        spinButton.style.display = "none"; // Hide button while spinning
         let start = Date.now();
+
         function rotate() {
             let elapsed = Date.now() - start;
             let progress = elapsed / spinTime;
@@ -320,9 +323,15 @@ function showSpinningWheel() {
 
             if (spinSpeed < 0.5) {
                 isSpinning = false;
-                finalReward = rewards[Math.floor(numSlices - (spinAngle / (2 * Math.PI) * numSlices) % numSlices)];
-                document.getElementById("reward-text").innerHTML = `🎉 You won <b>${finalReward}</b>!`;
-                saveChatState();
+                let index = Math.floor(Math.random() * rewards.length);
+                finalReward = rewards[index];
+
+                setTimeout(() => {
+                    rewardText.innerHTML = `🎉 You won <b>${finalReward}</b>!`;
+                    rewardText.style.display = "block";
+                    saveChatState();
+                }, 1000);
+
                 return;
             }
 
@@ -339,11 +348,6 @@ function showSpinningWheel() {
     }
 
     drawWheel();
-
-    // Start spinning when clicked
-    canvas.onclick = function () {
-        spinWheel();
-    };
 
     chatBox.scrollTop = chatBox.scrollHeight;
     saveChatState();
